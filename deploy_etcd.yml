@@ -1,9 +1,9 @@
 ---
-- hosts: anygroup
+- name: Test play
+  hosts: etcd
+  become: true
   roles:
     - common
-    - anyrole
-
+    - pre-checks
+    - packages
 # Associate further roles to servers in specific group in this file...
-
-...

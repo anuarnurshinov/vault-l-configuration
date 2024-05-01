@@ -1,0 +1,5 @@
+---
+- name: Checking Linux distribution
+  ansible.builtin.fail:
+    msg: "{{ ansible_distribution }} is not supported"
+  when: ansible_distribution not in os_valid_distributions

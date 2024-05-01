@@ -1,8 +1,9 @@
 ---
 # Default is to log in as root
-ansible_user: root
-remote_user: root
-
+ansible_user: user
 # Add further variables which apply to all servers to this file...
+os_valid_distributions:
+  - Ubuntu
 
-...
+os_minimum_versions:
+  Ubuntu: 20.04
