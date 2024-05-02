@@ -1,0 +1,61 @@
+---
+- name: Install python3
+  ansible.builtin.apt:
+    pkg:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Update PIP
+  ansible.builtin.pip:
+    state: forcereinstall
+    name:
+      - testresources
+      - setuptools
+      - psycopg2-binary
+      - patroni
+      - python-etcd
+
+- name: Ensure patroni dir /etc/patroni exists
+  ansible.builtin.file:
+    path: /etc/patroni
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0744"
+
+# - name: Ensure patroni dir pgsql exists
+#   ansible.builtin.file:
+#     path: /var/lib/pgsql
+#     state: directory
+#     owner: postgres
+#     group: postgres
+#     mode: "0744"
+
+- name: Create patroni template
+  ansible.builtin.template:
+    src: patroni.yml
+    dest: /etc/patroni/patroni.yml
+    owner: postgres
+    mode: "0744"
+  vars:
+    another_host_ips: >-
+      {{
+        hostvars
+          | dict2items
+          | selectattr('key', 'in', groups.postgres)
+          | map(attribute="value.ansible_host")
+          | reject('eq', ansible_all_ipv4_addresses[0])
+      }}
+
+- name: Create patroni service
+  ansible.builtin.template:
+    owner: postgres
+    src: patroni.service
+    dest: /etc/systemd/system/patroni.service
+    mode: "0744"
+
+- name: Start patroni service
+  ansible.builtin.service:
+    state: restarted
+    name: patroni

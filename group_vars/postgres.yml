@@ -5,3 +5,7 @@ etcd_distr_type: linux-amd64
 google_url: https://storage.googleapis.com/etcd
 github_url: https://github.com/etcd-io/etcd/releases/download
 download_url: "{{ github_url }}/{{ etcd_ver }}/etcd-{{ etcd_ver }}-{{ etcd_distr_type }}.tar.gz"
+pg_data_dir: /var/lib/postgresql/12/main
+pg_bin_dir: /usr/lib/postgresql/12/bin
+pg_config_dir: /etc/postgresql/12/main
+postgres_password: postgres_password1245

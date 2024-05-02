@@ -1,0 +1,54 @@
+name: cup-{{ inventory_hostname_short }}
+scope: patroni_cluster
+etcd:
+  hosts: "{{ansible_all_ipv4_addresses[0]}}:2379,{{another_host_ips[0]}}:2379, {{another_host_ips[0]}}:2379"
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: "{{ansible_all_ipv4_addresses[0]}}:8008"
+bootstrap:
+  users:
+    replication:
+      username: replicator
+      password: "{{ postgres_password }}"
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    maximum_lag_on_failover: 1048576
+    postgresql:
+      use_pg_rewind: true
+use_slots: true
+parameters:
+  archive_mode: "on"
+  wal_level: hot_standby
+  max_wal_senders: 10
+  wal_keep_segments: 8
+  archive_timeout: 1800s
+  max_replication_slots: 5
+  hot_standby: "on"
+  wal_log_hints: "on"
+initdb:
+  - encoding: UTF8
+  - data-checksums
+postgresql:
+  pgpass: "{{ pg_data_dir }}/.pgpass"
+  listen: 0.0.0.0:5432
+  connect_address: "{{ansible_all_ipv4_addresses[0]}}:5432"
+  data_dir: "{{ pg_data_dir }}"
+  config_dir: "{{ pg_config_dir }}"
+  bin_dir: "{{ pg_bin_dir }}"
+  pg_rewind:
+    username: postgres
+    password: "{{ postgres_password }}"
+  pg_hba:
+    - local all postgres trust
+    - host all postgres 127.0.0.1/32 trust
+    - host replication replicator {{ansible_all_ipv4_addresses[0]}}/32 trust
+    - host replication replicator 127.0.0.1/32 trust
+    - host replication replicator {{another_host_ips[0]}}/32 trust
+    - host all all 0.0.0.0/0 md5
+  replication:
+    username: replicator
+    password: "{{ postgres_password }}"
+  superuser:
+    username: postgres
+    password: "{{ postgres_password }}"

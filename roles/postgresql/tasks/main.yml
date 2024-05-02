@@ -1,0 +1,32 @@
+---
+- name: Install postgresql
+  ansible.builtin.apt:
+    name: postgresql
+    state: present
+  register: apt_status
+  until: apt_status is success
+  delay: 5
+  retries: 3
+
+- name: Update postgres password
+  ansible.builtin.user:
+    state: present
+    name: postgres
+    password: "{{ postgres_password }}"
+
+- name: Change postgres password in db
+  ansible.builtin.postgresql_user:
+    db: postgres
+    name: postgres
+    password: "{{ postgres_password }}"
+  become: true
+  become_user: postgres
+
+- name: Debug
+  ansible.builtin.debug:
+    var: "postgres_user_outup"
+
+- name: Start postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    state: reloaded

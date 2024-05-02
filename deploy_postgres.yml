@@ -7,4 +7,6 @@
     # - pre-checks
     # - packages
     - etcd
+    - postgresql
+    - patroni
 # Associate further roles to servers in specific group in this file...
