@@ -1,0 +1,3 @@
+---
+- name: Deploy PostgreSQL Cluster
+  import_playbook: deploy_postgres.yml

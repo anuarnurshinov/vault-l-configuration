@@ -1,0 +1,7 @@
+---
+# Add variables which apply to servers in a specific group to this file...
+etcd_ver: v3.5.5
+etcd_distr_type: linux-amd64
+google_url: https://storage.googleapis.com/etcd
+github_url: https://github.com/etcd-io/etcd/releases/download
+download_url: "{{ github_url }}/{{ etcd_ver }}/etcd-{{ etcd_ver }}-{{ etcd_distr_type }}.tar.gz"

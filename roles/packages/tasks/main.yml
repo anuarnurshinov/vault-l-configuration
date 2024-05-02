@@ -1,10 +1,4 @@
 ---
-#
-# Tasks to be applied to some servers
-#
-
-# Add tasks for a specific role to this playbook...
-
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true
@@ -13,15 +7,6 @@
   until: apt_status is success
   delay: 5
   retries: 3
-
-# - name: Make sure that the iproute is installed
-#   ansible.builtin.apt:
-#     name: iproute2
-#     state: present
-#   register: apt_status
-#   until: apt_status is success
-#   delay: 5
-#   retries: 3
 
 - name: Make sure the gnupg and apt-transport-https packages are present
   ansible.builtin.apt:

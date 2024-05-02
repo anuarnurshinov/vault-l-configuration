@@ -1,0 +1,25 @@
+[Unit]
+Description=etcd service
+Documentation=https://github.com/coreos/etcd
+
+[Service]
+User=etcd
+Type=notify
+ExecStart=/usr/local/bin/etcd \
+ --name cup-{{ inventory_hostname_short }} \
+ --enable-v2=true \
+ --data-dir /var/lib/etcd \
+ --initial-advertise-peer-urls http://{{ansible_all_ipv4_addresses[0]}}:2380 \
+ --listen-peer-urls http://0.0.0.0:2380 \
+ --listen-client-urls http://0.0.0.0:2379 \
+ --advertise-client-urls http://{{ansible_all_ipv4_addresses[0]}}:2379 \
+ --initial-cluster cup-{{ inventory_hostname_short }}=http://{{ansible_all_ipv4_addresses[0]}}:2380,cup-target1=http://{{another_host_ips[0]}}:2380,cup-target2=http://{{another_host_ips[1]}}:2380 \
+ {% if 'master' in group_names %}
+ --initial-cluster-state new \
+ {% endif %}
+ --heartbeat-interval 1000 \
+ --election-timeout 5000
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target

@@ -7,4 +7,16 @@
   ansible.builtin.ping:
     data: alive
   tags: check
+- name: Debug
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        hostvars
+          | dict2items
+          | selectattr('key', 'in', groups.postgres)
+          | map(attribute="value.ansible_host")
+          | reject('eq', ansible_all_ipv4_addresses[0])
+          | join(',')
+      }}
+
 # Add further tasks for the common role (applied to all servers) to this playbook...

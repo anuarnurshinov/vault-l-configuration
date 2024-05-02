@@ -1,9 +1,10 @@
 ---
 - name: Test play
-  hosts: etcd
+  hosts: postgres
   become: true
   roles:
     - common
-    - pre-checks
-    - packages
+    # - pre-checks
+    # - packages
+    - etcd
 # Associate further roles to servers in specific group in this file...

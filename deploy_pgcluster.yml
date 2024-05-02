@@ -1,3 +1,0 @@
----
-- name: Deploy PostgreSQL Cluster
-  import_playbook: deploy_etcd.yml

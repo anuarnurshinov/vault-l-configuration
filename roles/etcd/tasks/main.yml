@@ -1,0 +1,80 @@
+---
+- name: Download etcd archive
+  ansible.builtin.get_url:
+    url: "{{ download_url }}"
+    dest: /tmp/etcd-{{ etcd_ver }}-{{ etcd_distr_type }}.tar.gz
+    mode: "0440"
+  register: download_output
+  when: ansible_architecture == "x86_64"
+
+- name: Extract etcd archive into /tmp/
+  ansible.builtin.unarchive:
+    src: "{{ download_output.dest }}"
+    remote_src: true
+    dest: /tmp/
+  register: extract_output
+
+- name: Delete downloaded archive
+  ansible.builtin.file:
+    state: absent
+    name: "{{ download_output.dest }}"
+
+- name: Find binaries to copy
+  ansible.builtin.find:
+    paths: "{{ extract_output.dest }}"
+    recurse: true
+    patterns: "etcd*"
+  register: files_to_copy
+
+- name: Copy binaries to /usr/local/bin
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ item.path }}"
+    dest: "/usr/local/bin/"
+    mode: "0755"
+  with_items: "{{ files_to_copy.files }}"
+
+- name: Create etcd user group
+  ansible.builtin.group:
+    name: etcd
+    system: true
+
+- name: Create etcd user
+  ansible.builtin.user:
+    name: etcd
+    group: etcd
+    create_home: false
+    shell: /sbin/nologin
+    system: true
+
+- name: Create dirs for etcd
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: etcd
+    group: etcd
+    mode: "0700"
+  loop:
+    - /var/lib/etcd/
+    - /etc/etcd
+
+- name: Create template
+  ansible.builtin.template:
+    src: etcd.service
+    dest: /etc/systemd/system/etcd.service
+    mode: "0744"
+  vars:
+    another_host_ips: >-
+      {{
+        hostvars
+          | dict2items
+          | selectattr('key', 'in', groups.postgres)
+          | map(attribute="value.ansible_host")
+          | reject('eq', ansible_all_ipv4_addresses[0])
+      }}
+
+- name: Start service
+  ansible.builtin.service:
+    name: etcd
+    state: started
+    enabled: true
